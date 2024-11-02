@@ -1,0 +1,74 @@
+\documentclass[aspectratio=169]{beamer}
+\usetheme{Montpellier}
+\usecolortheme{spruce}
+
+\usepackage{pgfpages} % For slide numbering
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{helvet}
+\usepackage{adjustbox}
+\usepackage{listings}  % Add any other necessary packages here
+\usepackage{xcolor}     % Add this for color customization
+\setbeamertemplate{caption}[numbered]
+
+% Define custom colors
+\definecolor{lightgray}{rgb}{0.95, 0.95, 0.95}  % Very light grey background
+\definecolor{pink}{rgb}{1.0, 0.75, 0.8}         % Pink color for line numbers
+\definecolor{keywordcolor}{rgb}{0, 0, 0.5}      % Dark blue for keywords
+\definecolor{commentcolor}{rgb}{0.0, 0.5, 0.0}  % Dark green for comments
+\definecolor{stringcolor}{rgb}{0.58, 0, 0.82}   % Purple for strings
+
+% Presentation information
+\title[Compiler optimization]{Polyglot Program Optimization}
+\subtitle{MTP Phase-I}
+\author{\normalsize Anadi Mitra \\23M0810 \\\vspace{3mm}\footnotesize{Advisor: Prof. Manas Thakur}}
+\institute{Department of Computer Science and Engineering,\\ Indian Institute of Technology Bombay}
+\date{\tiny{October 29, 2024}}
+
+% Set up custom footer for slide numbering
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{section in toc}[square] % Use square bullets for sections
+
+\begin{document}
+
+% Title Slide
+    \begin{frame}
+        \titlepage
+%        \vfill
+%        \begin{center}
+%            \includegraphics[width=2cm]{images/IITB-Logo} % Adjust width as needed
+%        \end{center}
+    \end{frame}
+
+% Table of Contents
+    \begin{frame}{Table of Contents}
+        \tableofcontents
+    \end{frame}
+
+% Import chapters
+    \section{Introduction to Polyglot Programming}
+    \input{chapters/1_introduction}
+
+    \section{GraalVM and Truffle}
+    \input{chapters/2_graalvm_truffle}
+
+    \section{Java Native Interface, a Polyglot System?}
+    \input{chapters/3_jni_polyglot_comparison}
+
+    \section{A Common Interface for Polyglot Systems}
+    \input{chapters/4_common_interface}
+
+    \section{Conclusion and Future Work}
+    \input{chapters/5_conclusion}
+
+    \section{References}
+    \input{chapters/6_references}
+
+    \section{Q\&A}
+    \input{chapters/7_thank_you}
+
+    \section{}
+    \input{chapters/8_extras}
+
+
+\end{document}

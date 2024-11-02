@@ -1,0 +1,128 @@
+% jni_static_analysis.tex
+\begin{frame}
+    \centering
+    \textbf\ttfamily{\huge{Java Native Interface}}
+\end{frame}
+
+\begin{frame}{Java Native Interface}
+    \begin{itemize}
+        \vspace{3mm}
+        \item The Java Native Interface (JNI) acts as a bridge between Java and native languages.
+        \vspace{3mm}
+        \item Enables Java programs to leverage the advantages of native code.
+        \vspace{3mm}
+        \item Similar to polyglot systems but does not have a shared runtime.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Example of JNI in Java}
+    \begin{center}
+        \begin{minipage}{0.8\textwidth} % Adjust width as needed
+            \begin{lstlisting}[language=java,
+                frame=single,
+                numbers=left,
+                basicstyle=\tiny\ttfamily,
+                caption={Vector arithmetic  },
+                captionpos=b,
+                backgroundcolor=\color{lightgray},   % Background color
+                numberstyle=\color{pink},            % Line number color
+                keywordstyle=\color{keywordcolor}\bfseries, % Keywords color
+                commentstyle=\color{commentcolor},   % Comment color
+                stringstyle=\color{stringcolor}      % String color
+            ,label={lst:lstlisting}]
+public class Main {
+    static { // Load the native library
+        System.loadLibrary("Polynative");
+    }
+    // Declare the native method for addition
+    public native Vectors add(Vectors a,Vectors b);
+
+    public static void main(String[] args) {
+        Vectors p1 = new Vectors(31, 2);    //O9
+        Vectors p2 = new Vectors(4, 54);    //O10
+
+        Main caller=new Main();             //O12
+        Vectors result1 = caller.add(p1,p2);  // Add p1 and p2
+        result1.display();
+
+        for (int i = 0; i < 10000; i++) {
+            Vectors temp = new Vectors(i*i, 3*i); //O17
+            Vectors sum = caller.add(p1,temp);
+            sum.display();
+        }
+    }
+}
+            \end{lstlisting}
+        \end{minipage}
+    \end{center}
+%    This example shows a Java HashMap being passed to a Python function, which retrieves and prints values.
+\end{frame}
+
+\begin{frame}{Escape Analysis in Java}
+    Object is said to be escaping from its allocating method if and only if:
+    \begin{itemize}
+        \vspace{3mm}
+        \item Object is assigned to a static(global) var.
+        \vspace{3mm}
+        \item It is accessible from another thread.
+        \vspace{3mm}
+        \item It is reachable via some chain of field dereferences.
+        \vspace{3mm}
+        \item Passed to a method as parameter which cannot be analyzed.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Escape Analysis in JNI Programs}
+    We modified an existing$_2$ inter-procedural escape analysis to collect the following information:
+    \begin{itemize}
+        \vspace{3mm}
+        \item Recording different types of calls(Static, Virtual, Special and Native).
+        \vspace{3mm}
+        \item Identifying objects escaped via native calls.
+    \end{itemize}
+     % Smaller font size for the source
+    \vspace{3cm}
+    \tiny
+    \textit{2: \url{https://github.com/meetesh06/}}
+\end{frame}
+
+\begin{frame}{Findings using SOOT Analysis Framework}
+    \begin{table}[H]
+        \label{tab:jni_analysis_results}
+        \begin{tabular}{|l|c|c|c|c|c|c|}
+            \hline
+            \textbf{Parameters} & \textbf{avrora} & \textbf{h2} & \textbf{batik}  & \textbf{helloWorld} & \textbf{myJNI} \\
+            \hline
+            Classes loaded          & 674  & 753  & 927  & 809  & 811  \\
+            Interface calls          & 1499  & 2159  & 1360  & 6586  & 6857  \\
+            Special calls           & 1745  & 2062  & 2840   & 2314  & 2329  \\
+            JNI calls               & 42   & 53   & 54    & 65   & 65   \\
+            Virtual calls           & 11206 & 13027 & 14293  & 13358 & 14826 \\
+            Static calls            & 1124 & 1288  & 1715  & 1283  & 1286  \\
+            Total objects          & 934  & 1122  & 1068  & 1210  & 1223 \\
+            Escaped objects         & 531  & 459  & 768    & 569  & 574  \\
+            Escaped via JNI         & 180   & 82   & 302     & 151   & 151   \\
+            \% Escaped via JNI     & 33\%  & 17\%  & 39\%   & 26\%  & 26\%   \\
+            Methods analyzed        & 2987 & 3539 & 4310 & 4033 & 4051 \\
+            \hline
+        \end{tabular}
+        \caption{Results for some popular benchmark from $Dacapo$ \& custom programs}
+    \end{table}
+
+\end{frame}
+
+\begin{frame}{Summary}
+       \begin{itemize}
+        \vspace{3mm}
+        \item Experiment revealed that JNI calls are relatively rare.
+        \vspace{3mm}
+        \item The number of escaped objects through JNI calls were significant($~28\%$).
+        \vspace{3mm}
+        \item A $Hello world!$ program implicitly invokes JNI methods via java libraries.
+        \vspace{3mm}
+        \item These calls make results imprecise, since analysis is limited by language boundary.
+        \vspace{3mm}
+        \item If we could incorporate native methods analysis, optimization techniques could be improved.
+    \end{itemize}
+\end{frame}

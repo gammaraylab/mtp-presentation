@@ -1,0 +1,196 @@
+% 1_introduction.tex
+
+\begin{frame}{What are Polyglot Programs}
+    \begin{itemize}
+        \item Programs having multiple languages within a single program.
+        \vspace{3mm}
+        \item Programs that run in a shared runtime.
+        \vspace{3mm}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Example 1: Calling a Python function in Java}
+    \begin{center}
+        \begin{minipage}{0.8\textwidth} % Adjust width as needed
+        \begin{lstlisting}[language=java,
+            frame=single,
+            label={lst:pythonInJava},
+            numbers=left,
+            basicstyle=\tiny\ttfamily,
+            caption={Passing java's HashMap object to python},
+            captionpos=b,
+            backgroundcolor=\color{lightgray},   % Background color
+            numberstyle=\color{pink},            % Line number color
+            keywordstyle=\color{keywordcolor}\bfseries, % Keywords color
+            commentstyle=\color{commentcolor},   % Comment color
+            stringstyle=\color{stringcolor}      % String color
+        ]
+    public static void main(String[] args) {
+        HashMap<String, Object> input = new HashMap<>();
+        input.put("college", "IIT Bombay");
+        input.put("location", "Mumbai");
+        javaMapInPython(input);
+    }
+
+    @FunctionalInterface interface MapFunction {
+        Map printObjects(HashMap input);
+    }
+
+    public static void javaMapInPython(HashMap<String,Object> javaMap) {
+        Context context = Context.newBuilder().allowHostAccess(true).build();
+        Value function = context.eval("python",
+        "def printObjects(map):\n" +
+        "   print(map.get('college'))\n" +
+        "   print(map.get('location'))\n");
+
+        function.as(MapFunction.class).printObjects(javaMap);
+    }
+        \end{lstlisting}
+        \end{minipage}
+    \end{center}
+%    This example shows a Java HashMap being passed to a Python function, which retrieves and prints values.
+\end{frame}
+
+\begin{frame}[fragile]{Example 2: Java calling Python Script}
+
+    \begin{minipage}[b]{0.45\linewidth}
+        \centering
+        \begin{lstlisting}[
+            frame=single,
+            language=python,
+            numbers=left,
+            basicstyle=\tiny\ttfamily,
+            caption={\normalsize{Adding complex no. in loop}},
+            captionpos=b,
+            backgroundcolor=\color{lightgray},   % Background color
+            numberstyle=\color{pink},            % Line number color
+            keywordstyle=\color{keywordcolor}\bfseries, % Keywords color
+            commentstyle=\color{commentcolor},   % Comment color
+            stringstyle=\color{stringcolor}      % String color
+        ,label={lst:lstlisting4}]
+class ComplexNumber:
+def __init__(self, r, i):
+    self.r = r
+    self.i = i
+def __add__(self, other):
+    cTmp= ComplexNumber(self.r, other.i)
+    return ComplexNumber(self.r+other.r+cTmp.r,
+                         self.i+other.i+cTmp.i)
+def __str__(self):
+    return f"({self.r} + {self.i}i)"
+
+def addComplex(i:int, n:int):
+    c1 = ComplexNumber(545,n)  #python object
+    c2 = ComplexNumber(9878,i) #python object
+    return c1 + c2
+
+def addComplexLoop(n: int):
+    sum=0
+    for i in range(10000):
+        sum= sum+ addComplex(i,n).r
+    return sum
+        \end{lstlisting}
+    \end{minipage}
+    \hspace{6mm}
+    \begin{minipage}[b]{0.48\linewidth}
+        \centering
+        \begin{lstlisting}[
+            frame=single,
+            language=java,
+            numbers=left,
+            basicstyle=\tiny\ttfamily,
+            caption={Python script called from java},
+            captionpos=b,
+            backgroundcolor=\color{lightgray},   % Background color
+            numberstyle=\color{pink},            % Line number color
+            keywordstyle=\color{keywordcolor}\bfseries, % Keywords color
+            commentstyle=\color{commentcolor},   % Comment color
+            stringstyle=\color{stringcolor}      % String color
+        ,label={lst:lstlisting2.3}]
+void test() {
+    String pyFile=
+       "./src/main/polyglot/testCase.py";
+    //create a context
+    try (Context ctx = Context.create()) {
+       File f= new File(pyFile);
+       //load the file
+       Source src= Source.
+                  newBuilder("python",f).build();
+       //load the py script in ctx
+       ctx.eval(src);
+       //getting python function
+       Value pyLoop = ctx.getBindings("python")
+               .getMember("addComplexLoop");
+       //calling python fun
+       Value result= pyLoop.execute(1000);
+       System.out.println(result.asLong());
+    } catch (Exception e) {
+       e.printStackTrace();
+    }
+}
+        \end{lstlisting}
+    \end{minipage}
+\end{frame}
+\begin{frame}[fragile]{Example 3: Java utilizing JavaScript's Library}
+    \begin{center}
+        \begin{minipage}{0.8\textwidth} % Adjust width as needed
+            \begin{lstlisting}[
+                frame=single,
+                language=java,
+                label={lst:jsInJava},
+                numbers=left,
+                basicstyle=\tiny\ttfamily,
+                caption={Accessing the object returned by lodash in java},
+                captionpos=b,
+                backgroundcolor=\color{lightgray},   % Background color
+                numberstyle=\color{pink},            % Line number color
+                keywordstyle=\color{keywordcolor}\bfseries, % Keywords color
+                commentstyle=\color{commentcolor},   % Comment color
+                stringstyle=\color{stringcolor}      % String color
+                ]
+try (Context context = Context.newBuilder("js").allowAllAccess(true).build()) {
+    // Load Lodash library from CDN
+    String lodashLoad=
+            "load('https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js');";
+    context.eval("js", lodashLoad);
+    // Define a JavaScript object and use Lodash to deep clone it
+    String jsCode = ""
+            const obj = {
+                name: "Rosy",
+                address: {
+                    city: "Mumbai"
+                }
+            };
+            _.cloneDeep(obj);
+            "";
+
+    Value clonedObject = context.eval("js", jsCode);
+    // Access properties from the cloned object using the Value API
+    String name = clonedObject.getMember("name").asString();
+    String city = clonedObject.getMember("address").getMember("city").asString();
+}
+            \end{lstlisting}
+        \end{minipage}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Why Polyglot Programming?}
+    \begin{itemize}
+        \item Enhances flexibility, choose languages based on their strengths.
+        \vspace{3mm}
+        \item Use of existing libraries, increases development speed.
+        \vspace{3mm}
+        \item \textbf{Use case}: Python for simplicity, Java for performance, and JavaScript for web integration.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Challenges with Polyglot Programs}
+    \begin{itemize}
+        \item \textbf{Polyglot runtimes} are complex, though they abstract language boundaries.
+        \vspace{3mm}
+        \item \textbf{Debugging \& Readability} of mixed-language programs can be challenging.
+        \vspace{3mm}
+        \item \textbf{Traditional analysis} tools may not fully support polyglot code analysis.
+    \end{itemize}
+\end{frame}
+
